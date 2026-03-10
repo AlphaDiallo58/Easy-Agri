@@ -1,11 +1,1275 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Easy-Agri</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EasyAgri · Chauffeur</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --nav-bg: #A9D6E5;
+            --header-bg: #0B3B4B;
+            --primary-dark: #0B3B4B;
+            --primary-medium: #2C7A9E;
+            --primary-light: #D4ECF5;
+            --secondary-light: #F4FBFE;
+            --accent: #B8E2F2;
+            --text-dark: #0A2833;
+            --text-medium: #1F4457;
+            --text-light: #507687;
+            --bg-light: #F9FDFF;
+            --white: #FFFFFF;
+            --shadow-sm: 0 4px 12px rgba(10,40,51,0.06);
+            --shadow-md: 0 12px 28px rgba(10,40,51,0.12);
+            --shadow-lg: 0 24px 48px rgba(10,40,51,0.16);
+            --radius-card: 28px;
+            --radius-btn: 18px;
+            --transition: all 0.3s cubic-bezier(0.2,0,0,1);
+            --orange-accent: #F97316;
+            --orange-light: #FFEAD2;
+            --reject-red: #E63946;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(145deg, #E1F0F8 0%, #CDE7F2 40%, #B6DAEA 100%);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; padding: 0; margin: 0;
+        }
+
+        .app {
+            width: 100%; max-width: 768px; margin: 0 auto;
+            background: rgba(255,255,255,0.75); backdrop-filter: blur(12px);
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.5) inset;
+            border-radius: 44px; overflow: hidden; display: flex; flex-direction: column;
+            min-height: 100vh; border: 1px solid rgba(255,255,255,0.6);
+        }
+        @media (max-width:480px) { .app { border-radius: 0; } }
+
+        .status-bar {
+            background: linear-gradient(135deg, var(--header-bg) 0%, #0D4B5C 100%);
+            color: white; padding: 16px 24px; display: flex; justify-content: space-between;
+            align-items: center; font-size: 13px; font-weight: 500;
+            border-bottom: 1px solid rgba(255,255,255,0.2); box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .status-left { display: flex; gap: 12px; align-items: center; }
+        .status-left i { margin-right: 6px; opacity: 0.9; }
+        .logo-mini {
+            font-weight: 800; font-size: 16px; letter-spacing: -0.02em;
+            background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 40px;
+            backdrop-filter: blur(4px);
+        }
+        .status-right { display: flex; gap: 14px; align-items: center; }
+
+        .user-profile {
+            display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600;
+            color: var(--white); background: rgba(255,255,255,0.15);
+            padding: 6px 16px 6px 6px; border-radius: 100px; backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .user-avatar {
+            width: 40px; height: 40px; border-radius: 50%; object-fit: cover;
+            border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .user-profile i { font-size: 40px; color: white; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); }
+
+        .nav {
+            display: flex; background: rgba(169,214,229,0.7); backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.5); padding: 12px 16px; gap: 8px;
+            overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; max-width: 100%;
+        }
+        .nav::-webkit-scrollbar { display: none; }
+        .nav-item {
+            padding: 10px 18px; border-radius: 60px; font-size: 13px; font-weight: 600;
+            color: var(--text-dark); white-space: nowrap; transition: var(--transition);
+            cursor: pointer; border: none; background: transparent; letter-spacing: -0.01em;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.8); color: var(--primary-dark); transform: translateY(-1px); }
+        .nav-item i { margin-right: 8px; font-size: 14px; }
+        .nav-item.active { background: white; color: var(--primary-dark); box-shadow: 0 6px 14px rgba(11,59,75,0.15); font-weight: 700; }
+
+        .content { flex: 1; overflow-y: auto; padding: 32px 28px; background: transparent; scroll-behavior: smooth; }
+
+        .popup {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,20,30,0.5); backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;
+        }
+        .popup-content {
+            background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border-radius: 56px;
+            padding: 40px 32px; max-width: 500px; width: 100%;
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.8) inset;
+            border: 1px solid rgba(255,255,255,0.7); animation: popupFade 0.25s ease;
+        }
+        @keyframes popupFade { from { opacity:0; transform:scale(0.92); } to { opacity:1; transform:scale(1); } }
+        .popup-content h3 { font-size:28px; font-weight:700; color:var(--text-dark); margin-bottom:24px; display:flex; gap:12px; }
+        .popup-content h3 i { color:var(--primary-medium); font-size:32px; }
+        .popup-content p {
+            background: rgba(255,255,255,0.6); backdrop-filter: blur(4px); padding:24px; border-radius:36px;
+            font-size:16px; color:var(--text-medium); margin-bottom:32px; border:1px solid rgba(255,255,255,0.8);
+            line-height:1.8;
+        }
+        .popup-actions { display:flex; gap:16px; flex-wrap:wrap; }
+        .popup-actions .btn-primary, .popup-actions .btn-secondary { flex:1 1 auto; padding:16px 18px; font-size:16px; border-radius:50px; }
+
+        .error-msg {
+            font-size:13px; color:#B82E2E; margin-top:8px; display:flex; align-items:center; gap:8px;
+            background:rgba(255,235,235,0.7); backdrop-filter:blur(4px); padding:10px 16px; border-radius:40px;
+        }
+        .success-card {
+            background:linear-gradient(135deg, rgba(220,245,220,0.8), rgba(190,230,190,0.8));
+            backdrop-filter:blur(8px); border:1px solid rgba(100,180,100,0.4); border-radius:var(--radius-card);
+            padding:40px 32px; text-align:center; margin:24px 0;
+        }
+        .success-card .success-emoji { font-size:70px; margin-bottom:16px; }
+        .success-card .success-title { font-size:28px; font-weight:800; color:#0B4F2B; margin-bottom:8px; }
+        .success-card .success-sub { font-size:16px; color:#1A6E3B; }
+
+        .sync-overlay {
+            padding:36px; text-align:center; background:rgba(244,251,254,0.7); backdrop-filter:blur(12px);
+            border-radius:var(--radius-card); border:1px dashed var(--primary-medium);
+        }
+        .sync-content { display:flex; flex-direction:column; align-items:center; }
+
+        .card {
+            background:rgba(255,255,255,0.7); backdrop-filter:blur(16px); border-radius:var(--radius-card);
+            padding:24px; box-shadow:var(--shadow-md), 0 0 0 1px rgba(255,255,255,0.6) inset;
+            border:1px solid rgba(255,255,255,0.7); margin-bottom:20px; transition:var(--transition);
+        }
+        .card:hover { box-shadow:var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.8) inset; transform:translateY(-2px); }
+
+        .section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        .section-title { font-size:24px; font-weight:700; color:var(--text-dark); display:flex; align-items:center; gap:8px; letter-spacing:-0.02em; }
+        .section-date {
+            color:var(--text-light); font-size:14px; font-weight:600;
+            background:rgba(255,255,255,0.6); backdrop-filter:blur(4px); padding:6px 16px; border-radius:40px;
+            border:1px solid rgba(255,255,255,0.8);
+        }
+
+        .vehicle-chip {
+            background:rgba(255,255,255,0.5); backdrop-filter:blur(8px); padding:12px 22px; border-radius:60px;
+            font-size:16px; font-weight:600; color:var(--primary-dark); display:inline-flex; align-items:center; gap:10px;
+            margin-bottom:24px; border:1px solid rgba(255,255,255,0.8); box-shadow:0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .producer-table {
+            width:100%; border-collapse:collapse; background:rgba(255,255,255,0.5); backdrop-filter:blur(8px);
+            border-radius:32px; overflow:hidden; box-shadow:var(--shadow-sm), 0 0 0 1px rgba(255,255,255,0.7) inset;
+            border:1px solid rgba(255,255,255,0.7);
+        }
+        .producer-table thead th {
+            background:rgba(244,251,254,0.6); backdrop-filter:blur(4px); color:var(--text-medium);
+            font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em;
+            padding:16px 20px; text-align:left; border-bottom:1px solid rgba(255,255,255,0.6);
+        }
+        .producer-table tbody tr { cursor:pointer; transition:var(--transition); }
+        .producer-table tbody tr:hover { background:rgba(255,255,255,0.8); }
+        .producer-table tbody td { padding:18px 20px; vertical-align:middle; border-bottom:1px solid rgba(255,255,255,0.3); }
+        .producer-table tbody tr:last-child td { border-bottom:none; }
+        .producer-name { font-weight:700; color:var(--text-dark); font-size:18px; margin-bottom:6px; }
+        .producer-info { font-size:13px; color:var(--text-medium); display:flex; flex-direction:column; gap:4px; }
+        .producer-info i { width:20px; color:var(--primary-medium); }
+        .producer-time {
+            font-weight:600; color:var(--primary-dark); background:rgba(255,255,255,0.7); backdrop-filter:blur(4px);
+            padding:6px 16px; border-radius:40px; font-size:13px; display:inline-block; border:1px solid white;
+        }
+        .collect-link {
+            background:linear-gradient(145deg, var(--primary-dark), #0D4F62); color:white; border:none;
+            padding:12px 22px; border-radius:60px; font-weight:600; font-size:14px; cursor:pointer;
+            transition:var(--transition); display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
+            box-shadow:0 8px 18px rgba(11,59,75,0.3); border:1px solid rgba(255,255,255,0.3);
+        }
+        .collect-link:hover { background:linear-gradient(145deg, #0D4F62, var(--primary-dark)); transform:scale(1.02); box-shadow:0 10px 22px rgba(11,59,75,0.4); }
+        .badge-done {
+            background:rgba(220,245,220,0.7); backdrop-filter:blur(4px); color:#0B5E2E; padding:10px 20px;
+            border-radius:60px; font-weight:600; font-size:14px; display:inline-flex; align-items:center; gap:8px;
+            border:1px solid rgba(100,180,100,0.4);
+        }
+
+        .km-section { display:flex; gap:18px; margin:28px 0 24px; }
+        .km-box {
+            flex:1; background:rgba(255,255,255,0.5); backdrop-filter:blur(8px); border-radius:36px;
+            padding:20px; text-align:center; border:1px solid rgba(255,255,255,0.7); box-shadow:0 6px 16px rgba(0,0,0,0.02);
+        }
+        .km-label { font-size:13px; color:var(--text-light); margin-bottom:8px; font-weight:500; text-transform:uppercase; letter-spacing:0.04em; }
+        .km-value { font-size:32px; font-weight:800; color:var(--text-dark); line-height:1.2; }
+        .km-input {
+            width:100%; padding:14px; font-size:24px; font-weight:700; text-align:center;
+            border:1px solid rgba(255,255,255,0.9); border-radius:60px; outline:none;
+            background:rgba(255,255,255,0.8); backdrop-filter:blur(4px);
+        }
+        .km-input:focus { border-color:var(--primary-medium); box-shadow:0 0 0 4px rgba(44,122,158,0.15); }
+
+        .action-buttons { display:flex; gap:16px; margin-top:20px; }
+        .btn-primary {
+            flex:1; background:linear-gradient(145deg, var(--primary-dark), #0D4F62); color:white; border:none;
+            padding:18px; border-radius:60px; font-weight:700; font-size:16px; cursor:pointer;
+            transition:var(--transition); display:flex; align-items:center; justify-content:center; gap:8px;
+            box-shadow:0 10px 22px rgba(11,59,75,0.3); border:1px solid rgba(255,255,255,0.3);
+        }
+        .btn-primary:disabled { opacity:0.5; cursor:not-allowed; box-shadow:none; }
+        .btn-secondary {
+            flex:1; background:rgba(255,255,255,0.5); backdrop-filter:blur(8px); color:var(--primary-dark);
+            border:1.5px solid rgba(255,255,255,0.9); padding:18px; border-radius:60px; font-weight:600;
+            font-size:16px; cursor:pointer; transition:var(--transition); display:flex; align-items:center; justify-content:center; gap:8px;
+        }
+        .btn-secondary:hover { background:rgba(255,255,255,0.8); border-color:white; }
+        .btn-reject {
+            background: linear-gradient(145deg, #E63946, #C41E3A);
+            color: white; border: none; padding: 16px; border-radius: 60px; font-weight: 700;
+            font-size: 16px; cursor: pointer; transition: var(--transition); display: flex;
+            align-items: center; justify-content: center; gap: 8px; width: 100%;
+            box-shadow: 0 10px 22px rgba(230, 57, 70, 0.3); border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-reject:hover { background: #C41E3A; transform: translateY(-2px); }
+
+        .action-compact-btn {
+            background: linear-gradient(145deg, #A9D6E5, #8EC4D6);
+            color: var(--text-dark);
+            border: 1px solid rgba(255,255,255,0.8);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            width: fit-content;
+            margin: 8px auto 0;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .action-compact-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #ccc;
+        }
+
+        .detail-card {
+            background:rgba(255,255,255,0.6); backdrop-filter:blur(20px); border-radius:48px; padding:28px;
+            box-shadow:var(--shadow-lg), 0 0 0 1px rgba(255,255,255,0.7) inset; border:1px solid rgba(255,255,255,0.7);
+        }
+        .detail-field { margin-bottom:24px; }
+        .detail-table {
+            width:100%; border-collapse:collapse; background:rgba(255,255,255,0.4); backdrop-filter:blur(4px);
+            border-radius:32px; overflow:hidden; border:1px solid rgba(255,255,255,0.6);
+        }
+        .detail-table th {
+            background:rgba(244,251,254,0.5); color:var(--text-medium); font-size:12px; font-weight:700;
+            text-transform:uppercase; letter-spacing:0.06em; padding:14px 20px; text-align:left; width:38%;
+        }
+        .detail-table td { padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.4); }
+        .detail-table tr:last-child td { border-bottom:none; }
+        .detail-label {
+            font-size:13px; font-weight:600; text-transform:uppercase; letter-spacing:0.06em;
+            color:var(--text-light); margin-bottom:8px; display:flex; align-items:center; gap:6px;
+        }
+        .detail-value {
+            background:rgba(255,255,255,0.5); backdrop-filter:blur(4px); padding:20px 24px; border-radius:36px;
+            font-size:16px; font-weight:500; color:var(--text-dark); border:1px solid rgba(255,255,255,0.7);
+            display:flex; justify-content:space-between; align-items:center;
+        }
+        .volume-preview { font-size:26px; font-weight:800; color:var(--primary-dark); }
+        .subsection-title { font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-light); margin-bottom:12px; }
+        .quality-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-top:12px; }
+        .quality-pill {
+            background:rgba(255,255,255,0.5); backdrop-filter:blur(4px); border-radius:60px;
+            padding:12px 18px; display:flex; justify-content:space-between; align-items:center;
+            font-size:14px; border:1px solid rgba(255,255,255,0.7);
+        }
+        .quality-pill span:last-child { font-weight:700; color:var(--primary-dark); }
+        .quality-decision {
+            margin-top:12px; padding:12px 20px; border-radius:60px; font-size:14px; font-weight:600;
+            display:inline-flex; align-items:center; gap:10px;
+        }
+        .quality-decision.ok { background:rgba(200,240,200,0.7); backdrop-filter:blur(4px); color:#0B5E2E; }
+        .quality-decision.ko { background:rgba(255,220,220,0.7); backdrop-filter:blur(4px); color:#B3261E; }
+
+        .comment-area {
+            width: 100%;
+            padding: 16px 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 30px;
+            font-family: inherit;
+            resize: vertical;
+            font-size: 15px;
+            background: #ffffff;
+            color: var(--text-dark);
+            transition: var(--transition);
+        }
+        .comment-area:focus {
+            border-color: var(--primary-medium);
+            box-shadow: 0 0 0 3px rgba(44,122,158,0.1);
+            outline: none;
+        }
+
+        .input-field {
+            width:100%; padding:16px 20px; font-size:16px; border:1px solid #e0e0e0; border-radius:40px;
+            outline:none; background:#ffffff; transition:var(--transition);
+        }
+        .input-field:focus { border-color:var(--primary-medium); box-shadow:0 0 0 3px rgba(44,122,158,0.1); }
+
+        .code-container {
+            background:rgba(169,214,229,0.4); backdrop-filter:blur(12px); border-radius:60px; padding:24px;
+            text-align:center; margin:24px 0; border:2px dashed rgba(255,255,255,0.8);
+        }
+        .code-digits { display:flex; gap:16px; justify-content:center; font-size:48px; font-weight:800; color:var(--primary-dark); letter-spacing:12px; margin:16px 0; text-shadow:0 4px 8px rgba(0,0,0,0.05); }
+        .code-input { width:100%; padding:16px; font-size:28px; text-align:center; letter-spacing:12px; font-weight:700; border:2px solid white; border-radius:60px; background:rgba(255,255,255,0.7); backdrop-filter:blur(4px); }
+
+        .pump-animation {
+            display:flex; align-items:center; justify-content:center; gap:20px; margin:16px 0; padding:16px;
+            background:rgba(255,255,255,0.5); backdrop-filter:blur(12px); border-radius:60px;
+        }
+        .pump-icon { font-size:40px; color:var(--primary-medium); animation:pump 1.2s infinite ease-in-out; }
+        .progress-bar { width:100%; height:8px; border-radius:999px; background:rgba(0,0,0,0.06); overflow:hidden; margin-top:6px; }
+        .progress-bar-fill { height:100%; width:0; background:linear-gradient(90deg, var(--primary-medium), var(--primary-dark)); transition:width 0.2s ease-out; border-radius:999px; }
+        @keyframes pump { 0%{transform:scale(1);} 50%{transform:scale(1.15);} }
+
+        .tanks-grid { display:flex; flex-wrap:wrap; gap:16px; margin:20px 0; }
+        .tank {
+            background:rgba(255,255,255,0.5); backdrop-filter:blur(8px); border-radius:60px; padding:14px 24px;
+            font-weight:700; color:var(--primary-dark); border:1px solid rgba(255,255,255,0.8);
+            display:flex; align-items:center; gap:12px; font-size:15px; box-shadow:0 4px 12px rgba(0,0,0,0.02);
+        }
+
+        .signature-area {
+            border: 1px solid #e0e0e0;
+            border-radius: 30px;
+            padding: 24px;
+            text-align: center;
+            margin: 24px 0;
+            background: #ffffff;
+            cursor: pointer;
+        }
+        .signature-area canvas {
+            width: 100%;
+            height: 120px;
+            background: #f9f9f9;
+            border-radius: 20px;
+            touch-action: none;
+        }
+
+        .back-button-bottom {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: transparent; border: none; color: var(--primary-dark);
+            font-weight: 600; font-size: 15px; margin: 24px auto 8px; padding: 8px 16px;
+            border-radius: 40px; transition: var(--transition); cursor: pointer; width: fit-content;
+        }
+        .back-button-bottom:hover { background: rgba(255,255,255,0.5); transform: translateY(-1px); }
+
+        .back-button {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.5); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.8); color: var(--primary-dark);
+            font-weight: 600; font-size: 16px; margin-bottom: 24px; cursor: pointer;
+            padding: 12px 22px 12px 18px; border-radius: 60px; transition: var(--transition);
+        }
+        .back-button:hover { background: rgba(255,255,255,0.8); transform: translateX(-4px); }
+
+        .spinner { width:24px; height:24px; border:3px solid rgba(255,255,255,0.3); border-top-color:white; border-radius:50%; animation:spin 0.8s linear infinite; display:inline-block; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        .calendar-wrap {
+            background:rgba(255,255,255,0.5); backdrop-filter:blur(16px); border-radius:48px; overflow:hidden;
+            box-shadow:var(--shadow-md), 0 0 0 1px rgba(255,255,255,0.6) inset; border:1px solid rgba(255,255,255,0.7);
+            max-width:450px; margin:0 auto;
+        }
+        .calendar-title { background:var(--primary-dark); color:white; text-align:center; padding:16px; font-size:18px; font-weight:700; }
+        .calendar-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:0; }
+        .calendar-weekday { background:rgba(244,251,254,0.5); color:var(--text-medium); font-size:11px; font-weight:700; text-align:center; padding:12px 4px; border:1px solid rgba(255,255,255,0.5); }
+        .calendar-day { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:600; border:1px solid rgba(255,255,255,0.5); cursor:default; min-height:44px; max-width:44px; }
+        .calendar-day.empty { background:rgba(244,251,254,0.2); color:var(--text-light); }
+        .calendar-day.travail { background:rgba(200,240,200,0.6); backdrop-filter:blur(4px); color:#0B5E2E; cursor:pointer; }
+        .calendar-day.travail:hover { background:rgba(180,230,180,0.8); transform:scale(1.02); }
+        .calendar-day.repos { background:rgba(255,210,210,0.6); backdrop-filter:blur(4px); color:#B3261E; }
+        .calendar-day.conge { background:linear-gradient(145deg, rgba(144,202,249,0.7), rgba(66,165,245,0.7)); backdrop-filter:blur(4px); color:#0D47A1; }
+        .calendar-legend {
+            display:flex; flex-wrap:wrap; gap:16px; justify-content:center; padding:20px; margin-top:20px;
+            background:rgba(255,255,255,0.4); backdrop-filter:blur(12px); border-radius:60px; border:1px solid rgba(255,255,255,0.6);
+        }
+        .legend-item { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--text-dark); }
+        .legend-dot { width:22px; height:22px; border-radius:10px; border:1px solid rgba(255,255,255,0.6); }
+        .legend-dot.travail { background:rgba(140,210,140,0.8); }
+        .legend-dot.repos { background:rgba(255,160,160,0.8); }
+        .legend-dot.conge { background:linear-gradient(145deg, #90CAF9, #42A5F5); }
+
+        .login-minimal {
+            max-width:380px; margin:0 auto; background:rgba(255,255,255,0.8); backdrop-filter:blur(16px);
+            border-radius:40px; padding:32px 28px; border:2px solid var(--orange-accent); box-shadow:0 20px 40px rgba(0,0,0,0.15);
+        }
+        .login-minimal h2 { font-size:28px; font-weight:700; color:var(--text-dark); margin-bottom:24px; text-align:center; }
+        .login-minimal .input-group { margin-bottom:20px; }
+        .login-minimal label { display:block; font-size:14px; font-weight:600; color:var(--text-medium); margin-bottom:6px; }
+        .login-minimal .input-field { width:100%; padding:14px 18px; font-size:15px; border:1px solid #ddd; border-radius:30px; outline:none; background:white; }
+        .login-minimal .input-field:focus { border-color:var(--orange-accent); box-shadow:0 0 0 3px rgba(249,115,22,0.2); }
+        .login-minimal .forgot-password { text-align:right; margin:8px 0 24px; }
+        .login-minimal .forgot-password a { color:var(--orange-accent); font-size:14px; font-weight:600; text-decoration:none; }
+        .login-minimal .btn-primary { width:100%; padding:16px; font-size:16px; border-radius:40px; background:var(--orange-accent); border:none; color:white; font-weight:700; cursor:pointer; transition:0.2s; box-shadow:0 8px 18px rgba(249,115,22,0.3); }
+        .login-minimal .btn-primary:hover { background:#E05E0F; transform:translateY(-2px); }
+        .login-minimal .login-error { color:#b3261e; font-size:13px; margin-top:12px; text-align:center; }
+        .login-minimal .demo-hint { text-align:center; margin-top:16px; font-size:12px; color:var(--text-light); }
+
+        .home-icon-circle {
+            width:180px; height:180px; border-radius:50%; background:linear-gradient(145deg, var(--primary-light), var(--accent));
+            display:flex; align-items:center; justify-content:center; margin:0 auto 40px;
+            box-shadow:var(--shadow-lg), 0 0 0 3px rgba(255,255,255,0.5); font-size:80px; color:var(--primary-dark);
+        }
+
+        .non-conforme-message {
+            background:rgba(255,200,200,0.7); backdrop-filter:blur(4px); color:#B3261E;
+            padding:10px 16px; border-radius:40px; font-weight:600; text-align:center; margin:10px 0;
+        }
+
+        @media (max-width:768px) { .content { padding:24px 20px; } .section-title { font-size:22px; } .calendar-day { min-height:40px; } .home-icon-circle { width:150px; height:150px; font-size:70px; } }
+        @media (max-width:480px) { .nav-item { padding:8px 14px; font-size:12px; } .content { padding:20px 16px; } .producer-name { font-size:16px; } .km-value { font-size:28px; } .home-icon-circle { width:130px; height:130px; font-size:60px; } }
+    </style>
 </head>
 <body>
-    <h1>Bienvenue sur Easy-Agri !</h1>
-    <p>Espace Chauffeur.</p>
+    <div class="app" id="app">
+        <div class="status-bar">
+            <div class="status-left">
+                <span class="logo-mini">EasyAgri</span>
+                <i class="fas fa-signal"></i> 5G <i class="fas fa-wifi"></i> 09:42
+            </div>
+            <div class="status-right">
+                <div class="user-profile" id="userProfile">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="user-name">Utilisateur</span>
+                </div>
+            </div>
+        </div>
+        <div class="nav">
+            <div class="nav-item active"><i class="fas fa-home"></i> Accueil</div>
+            <div class="nav-item"><i class="fas fa-calendar-alt"></i> Mon planning</div>
+            <div class="nav-item"><i class="fas fa-route"></i> Bordereau</div>
+            <div class="nav-item"><i class="fas fa-file-signature"></i> Bon de collecte</div>
+            <div class="nav-item"><i class="fas fa-warehouse"></i> Bon de stockage</div>
+        </div>
+        <div class="content" id="content"></div>
+    </div>
+
+    <script>
+        (function() {
+            const driver = {
+                name: "M. Dumas",
+                matricule: "12345",
+                email: "m.dumas@easyagri.fr",
+                vehicle: "CJ-192-TT",
+                startKm: 12450,
+                endKm: null
+            };
+
+            const producers = [
+                {
+                    id: 1,
+                    name: "C. Roger",
+                    address: "21 rue du Lait, 74330 Sillingy",
+                    phone: "06 13 43 55 67",
+                    time: "08h00",
+                    milkType: "Vache",
+                    expectedVolume: 450,
+                    quality: "Bon",
+                    collected: false,
+                    actualVolume: null,
+                    comment: "",
+                    testPassed: false,
+                    codeValid: false,
+                    pumpingDone: false,
+                    qualityResults: null
+                },
+                {
+                    id: 2,
+                    name: "L. Barthalaut",
+                    address: "3 rue du Fromage, 74330 Poisy",
+                    phone: "07 88 21 42 17",
+                    time: "09h00",
+                    milkType: "Vache",
+                    expectedVolume: 380,
+                    quality: "Bon",
+                    collected: false,
+                    actualVolume: null,
+                    comment: "",
+                    testPassed: false,
+                    codeValid: false,
+                    pumpingDone: false,
+                    qualityResults: null
+                },
+                {
+                    id: 3,
+                    name: "M. Thibaud",
+                    address: "137 rue la Bergerie, 74150 Rumilly",
+                    phone: "07 35 52 21 86",
+                    time: "10h00",
+                    milkType: "Chèvre",
+                    expectedVolume: 510,
+                    quality: "Excellent",
+                    collected: false,
+                    actualVolume: null,
+                    comment: "",
+                    testPassed: false,
+                    codeValid: false,
+                    pumpingDone: false,
+                    qualityResults: null
+                }
+            ];
+
+            const VALIDATION_CODE = "7826";
+
+            let currentScreen = 'home';
+            let selectedProducerId = null;
+            let selectedCalendarDate = null;
+            let calendarMonth = 2;
+            let calendarYear = 2026;
+            let tourFinished = false;
+            let arrivalKmInput = '';
+            let errorMessage = '';
+            let authenticated = false;
+
+            const contentDiv = document.getElementById('content');
+
+            const MARS_2026_STATUS = {
+                1: 'TRAVAIL', 2: 'TRAVAIL', 3: 'TRAVAIL', 4: 'TRAVAIL', 5: 'TRAVAIL', 6: 'TRAVAIL',
+                7: 'REPOS', 8: 'TRAVAIL', 9: 'REPOS', 10: 'TRAVAIL', 11: 'TRAVAIL', 12: 'TRAVAIL',
+                13: 'TRAVAIL', 14: 'TRAVAIL', 15: 'CONGE', 16: 'TRAVAIL', 17: 'TRAVAIL', 18: 'REPOS',
+                19: 'REPOS', 20: 'TRAVAIL', 21: 'TRAVAIL', 22: 'REPOS', 23: 'REPOS', 24: 'TRAVAIL',
+                25: 'TRAVAIL', 26: 'TRAVAIL', 27: 'REPOS', 28: 'REPOS', 29: 'TRAVAIL', 30: 'TRAVAIL',
+                31: 'TRAVAIL'
+            };
+            const MONTH_NAMES = ['JANVIER','FÉVRIER','MARS','AVRIL','MAI','JUIN','JUILLET','AOÛT','SEPTEMBRE','OCTOBRE','NOVEMBRE','DÉCEMBRE'];
+
+            function getDayStatus(day, month, year) {
+                if (year === 2026 && month === 2) return MARS_2026_STATUS[day] || null;
+                return null;
+            }
+
+            function getCalendarDays(month, year) {
+                const first = new Date(year, month, 1);
+                const last = new Date(year, month + 1, 0);
+                const startOffset = (first.getDay() + 6) % 7;
+                const daysInMonth = last.getDate();
+                const cells = [];
+                for (let i = 0; i < startOffset; i++) cells.push({ empty: true });
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const status = getDayStatus(d, month, year);
+                    cells.push({ day: d, status: status || 'TRAVAIL', empty: false, dateStr: `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}` });
+                }
+                return cells;
+            }
+
+            function setActiveNav(index) {
+                const items = document.querySelectorAll('.nav-item');
+                items.forEach((item, i) => {
+                    if (i === index) item.classList.add('active');
+                    else item.classList.remove('active');
+                });
+            }
+
+            function updateDriverBadge() {
+                const userProfile = document.querySelector('.user-profile');
+                if (!userProfile) return;
+                if (authenticated) {
+                    userProfile.innerHTML = `
+                        <img class="user-avatar" src="chauffeur.png" alt="Chauffeur" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                        <span id="user-name">${driver.name}</span>
+                    `;
+                    const img = userProfile.querySelector('img');
+                    if (img) {
+                        img.onerror = function() {
+                            this.style.display = 'none';
+                            const icon = document.createElement('i');
+                            icon.className = 'fas fa-user-circle';
+                            icon.style.fontSize = '40px';
+                            icon.style.color = 'white';
+                            this.parentNode.insertBefore(icon, this.nextSibling);
+                        };
+                    }
+                } else {
+                    userProfile.innerHTML = `
+                        <i class="fas fa-user-circle" style="font-size: 40px; color: white;"></i>
+                        <span id="user-name">Utilisateur</span>
+                    `;
+                }
+            }
+
+            function render() {
+                switch (currentScreen) {
+                    case 'home': renderHome(); break;
+                    case 'login': renderLogin(); break;
+                    case 'calendar': renderCalendar(); break;
+                    case 'planning': renderPlanning(); break;
+                    case 'collection': renderCollection(); break;
+                    case 'stockage': renderStockage(); break;
+                    default: renderHome();
+                }
+            }
+
+            function renderHome() {
+                contentDiv.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 600px; text-align: center; padding: 40px;">
+                        <div class="home-icon-circle" id="homeIcon">
+                            <i class="fas fa-tractor"></i>
+                        </div>
+                        <h1 style="font-size: 52px; font-weight: 800; color: var(--text-dark); margin-bottom: 16px; letter-spacing: -0.02em;">EasyAgri</h1>
+                        <p style="font-size: 22px; color: var(--text-medium); margin-bottom: 8px;">Coopérative agricole</p>
+                        <p style="font-size: 18px; color: var(--text-light); margin-bottom: 60px; max-width: 500px;">Réaliser vos tournées de collecte en toute simplicité.</p>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 340px;">
+                            <button class="btn-primary" style="padding: 22px; font-size: 20px;">
+                                <i class="fas fa-sign-in-alt"></i> Se connecter
+                            </button>
+                            <p style="font-size: 15px; color: var(--text-light);">Espace chauffeur sécurisé</p>
+                        </div>
+                    </div>
+                `;
+
+                const homeIconDiv = document.getElementById('homeIcon');
+                const img = new Image();
+                img.onload = function() {
+                    homeIconDiv.innerHTML = `<img src="Acceuil.png" alt="EasyAgri" style="width:100%; height:100%; border-radius:50%; object-fit:cover;">`;
+                };
+                img.onerror = function() {};
+                img.src = 'Acceuil.png';
+
+                document.querySelector('.btn-primary').addEventListener('click', () => {
+                    currentScreen = 'login';
+                    render();
+                });
+            }
+
+            function renderLogin() {
+                setActiveNav(0);
+                contentDiv.innerHTML = `
+                    <div class="login-minimal">
+                        <h2>Se connecter</h2>
+                        <div class="input-group">
+                            <label>Identifiant</label>
+                            <input type="text" id="loginIdentifier" class="input-field" placeholder="mdumas2026" value="m.dumas@easyagri.fr">
+                        </div>
+                        <div class="input-group">
+                            <label>Mot de passe</label>
+                            <input type="password" id="loginPassword" class="input-field" placeholder="**************">
+                        </div>
+                        <div class="forgot-password">
+                            <a href="#">Mot de passe oublié ?</a>
+                        </div>
+                        <button class="btn-primary" id="ssoLoginBtn"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
+                        <div id="loginError" class="login-error"></div>
+                        <div class="demo-hint">Démo : utilisez l'email ou matricule (mdumas2026).</div>
+                    </div>
+                `;
+                const loginInput = document.getElementById('loginIdentifier');
+                const loginPassword = document.getElementById('loginPassword');
+                const loginBtn = document.getElementById('ssoLoginBtn');
+                const loginErrorEl = document.getElementById('loginError');
+
+                function attemptLogin() {
+                    const value = (loginInput.value || '').trim().toLowerCase();
+                    const password = loginPassword.value.trim();
+                    if (!value) {
+                        loginErrorEl.textContent = 'Veuillez saisir votre identifiant.';
+                        return;
+                    }
+                    const emailMatch = value === driver.email.toLowerCase();
+                    const matriculeMatch = value === driver.matricule.toLowerCase() || value === 'mdumas2026';
+                    if (!emailMatch && !matriculeMatch) {
+                        loginErrorEl.textContent = 'Identifiant inconnu pour EasyAgri.';
+                        return;
+                    }
+                    if (!password) {
+                        loginErrorEl.textContent = 'Mot de passe requis (démo : laissez vide ou n\'importe quoi).';
+                        return;
+                    }
+                    loginErrorEl.textContent = '';
+                    loginBtn.disabled = true;
+                    loginBtn.innerHTML = '<span class="spinner"></span> Vérification...';
+                    setTimeout(() => {
+                        authenticated = true;
+                        updateDriverBadge();
+                        currentScreen = 'calendar';
+                        render();
+                    }, 900);
+                }
+                loginBtn.addEventListener('click', attemptLogin);
+                loginInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+                loginPassword.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+            }
+
+            function renderCalendar() {
+                if (!authenticated) { currentScreen = 'login'; render(); return; }
+                setActiveNav(1);
+                const cells = getCalendarDays(calendarMonth, calendarYear);
+                const weekdays = ['LUNDI','MARDI','MERCREDI','JEUDI','VENDREDI','SAMEDI','DIMANCHE'];
+                contentDiv.innerHTML = `
+                    <div class="section-header" style="margin-bottom:20px;">
+                        <div class="section-title">
+                            <i class="fas fa-calendar-alt" style="color:var(--primary-dark);"></i>
+                            Mon planning
+                        </div>
+                    </div>
+                    <p style="font-size:15px;color:var(--text-medium);margin-bottom:20px;">
+                        Cliquez sur un jour <strong>travail</strong> pour voir la tournée.
+                    </p>
+                    <div class="calendar-wrap">
+                        <div class="calendar-title">${MONTH_NAMES[calendarMonth]} ${calendarYear}</div>
+                        <div class="calendar-grid">
+                            ${weekdays.map(w => `<div class="calendar-weekday">${w}</div>`).join('')}
+                            ${cells.map(c => c.empty ? `<div class="calendar-day empty"></div>` : `<div class="calendar-day ${(c.status||'TRAVAIL').toLowerCase()}" data-date="${c.dateStr}" data-status="${c.status}">${c.day}</div>`).join('')}
+                        </div>
+                    </div>
+                    <div class="calendar-legend">
+                        <div class="legend-item"><span class="legend-dot travail"></span> TRAVAIL</div>
+                        <div class="legend-item"><span class="legend-dot repos"></span> REPOS</div>
+                        <div class="legend-item"><span class="legend-dot conge"></span> CONGÉ</div>
+                    </div>
+                `;
+                document.querySelectorAll('.calendar-day.travail').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const selectedDate = el.dataset.date;
+                        selectedCalendarDate = selectedDate;
+                        const clients = producers.map(p => `🕒 ${p.time} · ${p.name}`).join('<br>');
+                        const popup = document.createElement('div');
+                        popup.className = 'popup';
+                        popup.innerHTML = `
+                            <div class="popup-content">
+                                <h3><i class="fas fa-calendar-day"></i> ${selectedDate}</h3>
+                                <p>${clients}</p>
+                                <div class="popup-actions">
+                                    <button class="btn-primary" id="start-tour">Réaliser votre tournée</button>
+                                    <button class="btn-secondary" id="close-popup">Retour</button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(popup);
+                        document.getElementById('start-tour').addEventListener('click', () => {
+                            currentScreen = 'planning';
+                            render();
+                            document.body.removeChild(popup);
+                        });
+                        document.getElementById('close-popup').addEventListener('click', () => {
+                            document.body.removeChild(popup);
+                        });
+                    });
+                });
+                document.querySelectorAll('.nav-item').forEach((item, i) => {
+                    item.addEventListener('click', () => {
+                        if (i === 0) { currentScreen = 'calendar'; setActiveNav(1); render(); }
+                        else if (i === 1) { currentScreen = 'calendar'; setActiveNav(1); render(); }
+                        else if (i === 2) {
+                            if (selectedCalendarDate) { currentScreen = 'planning'; setActiveNav(2); render(); }
+                            else { alert("Veuillez d'abord sélectionner un jour dans le planning."); }
+                        }
+                    });
+                });
+            }
+
+            function renderPlanning() {
+                if (!authenticated) { currentScreen = 'login'; render(); return; }
+                if (!selectedCalendarDate) { currentScreen = 'calendar'; render(); return; }
+                setActiveNav(2);
+
+                function isProducerDone(p) {
+                    return p.collected || (p.qualityResults && p.testPassed === false);
+                }
+                const allTreated = producers.every(isProducerDone);
+                const departKm = driver.startKm;
+                const arrival = driver.endKm !== null ? driver.endKm : '';
+                const totalExpected = producers.reduce((sum, p) => sum + p.expectedVolume, 0);
+                const totalCollected = producers.reduce((sum, p) => sum + (p.actualVolume || 0), 0);
+                const collectedCount = producers.filter(p => p.collected).length;
+                const nonConformeCount = producers.filter(p => p.qualityResults && p.testPassed === false).length;
+                let rows = '';
+                producers.forEach(p => {
+                    let statut = '';
+                    if (p.collected) {
+                        statut = `<span class="badge-done"><i class="fas fa-check-circle"></i> Collecté</span>`;
+                    } else if (p.qualityResults && p.testPassed === false) {
+                        statut = `<span class="badge-done" style="background:rgba(255,200,200,0.7); color:#B3261E;"><i class="fas fa-times-circle"></i> Non conforme</span>`;
+                    } else {
+                        statut = `<button class="collect-link" data-id="${p.id}"><i class="fas fa-file-signature"></i> Cliquez ici</button>`;
+                    }
+                    rows += `
+                        <tr data-id="${p.id}">
+                            <td>
+                                <div class="producer-name">${p.name}</div>
+                                <div class="producer-info">
+                                    <span><i class="fas fa-map-pin"></i> ${p.address}</span>
+                                    <span><i class="fas fa-phone-alt"></i> ${p.phone}</span>
+                                </div>
+                            </td>
+                            <td style="text-align:center;">
+                                <span class="producer-time"><i class="far fa-clock"></i> ${p.time}</span>
+                            </td>
+                            <td style="text-align:right;">${statut}</td>
+                        </tr>
+                    `;
+                });
+                contentDiv.innerHTML = `
+                    <button class="back-button" id="backToCalendar"><i class="fas fa-arrow-left"></i> Retour au calendrier</button>
+                    <div class="section-header">
+                        <div class="section-title"><i class="fas fa-calendar-check"></i> Tournée du ${selectedCalendarDate}</div>
+                        <div class="section-date">${selectedCalendarDate}</div>
+                    </div>
+                    <div class="vehicle-chip"><i class="fas fa-truck"></i> ${driver.vehicle} · Créé par A. Tiffoche</div>
+                    <div class="card" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div style="font-size: 15px;"><strong>${collectedCount} collectés / ${nonConformeCount} non conformes</strong> sur ${producers.length}</div>
+                        <div style="font-size: 15px;"><span style="font-weight:700;">${totalCollected} L</span> / ${totalExpected} L</div>
+                    </div>
+                    <table class="producer-table">
+                        <thead><tr><th>Producteur</th><th style="text-align:center;">Horaire</th><th style="text-align:right;">Statut</th></tr></thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                    <div class="km-section">
+                        <div class="km-box"><div class="km-label">KM départ</div><div class="km-value">${departKm}</div></div>
+                        <div class="km-box">
+                            <div class="km-label">KM arrivée</div>
+                            <input type="number" class="km-input" id="arrivalKm" value="${arrival}" placeholder="---" ${tourFinished || !allTreated ? 'disabled' : ''}>
+                        </div>
+                    </div>
+                    ${!allTreated ? '<p style="color: var(--text-medium); font-size: 13px; margin: -8px 0 12px;"><i class="fas fa-lock"></i> En attente de traitement de tous les producteurs.</p>' : ''}
+                    <p id="planningError" class="error-msg" style="display:none;"></p>
+                    <div class="action-buttons">
+                        <button class="btn-primary" id="validateTourBtn" ${!allTreated || arrival === '' ? 'disabled' : ''}><i class="fas fa-check"></i> VALIDER LA TOURNÉE</button>
+                        <button class="btn-secondary" id="reportErrorBtn"><i class="fas fa-exclamation-triangle"></i> SIGNALER ERREUR</button>
+                    </div>
+                    <p id="reportSuccess" style="display:none; color:#2e7d32; font-size:14px; margin-top:12px;"><i class="fas fa-check-circle"></i> Signalement envoyé.</p>
+                `;
+                document.querySelectorAll('.collect-link').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectedProducerId = parseInt(btn.dataset.id);
+                        currentScreen = 'collection';
+                        render();
+                    });
+                });
+                document.querySelectorAll('.producer-table tbody tr').forEach(row => {
+                    row.addEventListener('click', (e) => {
+                        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'I') return;
+                        const id = row.dataset.id;
+                        const prod = producers.find(p => p.id == id);
+                        if (prod && !prod.collected && !(prod.qualityResults && prod.testPassed === false)) {
+                            selectedProducerId = parseInt(id);
+                            currentScreen = 'collection';
+                            render();
+                        }
+                    });
+                });
+                const arrivalInput = document.getElementById('arrivalKm');
+                if (arrivalInput) {
+                    arrivalInput.addEventListener('input', (e) => {
+                        arrivalKmInput = e.target.value;
+                        driver.endKm = e.target.value ? parseInt(e.target.value) : null;
+                        const validateBtn = document.getElementById('validateTourBtn');
+                        if (validateBtn) {
+                            const allDone = producers.every(isProducerDone);
+                            const kmVal = e.target.value && parseInt(e.target.value) > driver.startKm;
+                            validateBtn.disabled = !(allDone && kmVal);
+                        }
+                    });
+                }
+                document.getElementById('validateTourBtn')?.addEventListener('click', () => {
+                    const errEl = document.getElementById('planningError');
+                    if (errEl) errEl.style.display = 'none';
+                    if (driver.endKm && driver.endKm > driver.startKm) {
+                        tourFinished = true;
+                        currentScreen = 'stockage';
+                        render();
+                    } else {
+                        if (errEl) {
+                            errEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Le kilométrage d\'arrivée doit être supérieur au départ.';
+                            errEl.style.display = 'flex';
+                        }
+                    }
+                });
+                document.getElementById('reportErrorBtn')?.addEventListener('click', () => {
+                    const msg = prompt('Décrivez l\'erreur :');
+                    const successEl = document.getElementById('reportSuccess');
+                    if (msg && successEl) successEl.style.display = 'block';
+                });
+                document.getElementById('backToCalendar')?.addEventListener('click', () => {
+                    currentScreen = 'calendar';
+                    setActiveNav(1);
+                    render();
+                });
+                document.querySelectorAll('.nav-item').forEach((item, i) => {
+                    item.addEventListener('click', () => {
+                        if (i === 0) { currentScreen = 'calendar'; setActiveNav(1); render(); }
+                        else if (i === 1) { currentScreen = 'calendar'; setActiveNav(1); render(); }
+                        else if (i === 2) {
+                            if (selectedCalendarDate) { currentScreen = 'planning'; setActiveNav(2); render(); }
+                            else { alert("Veuillez d'abord sélectionner un jour dans le planning."); }
+                        }
+                    });
+                });
+            }
+
+            function renderCollection() {
+                if (!authenticated) { currentScreen = 'login'; render(); return; }
+                setActiveNav(3);
+                const producer = producers.find(p => p.id === selectedProducerId);
+                if (!producer) return;
+                const volume = producer.actualVolume !== null ? producer.actualVolume : producer.expectedVolume;
+                const comment = producer.comment || '';
+                const testPassed = producer.testPassed;
+                const pumpingDone = producer.pumpingDone;
+                const qualityResults = producer.qualityResults;
+                const qualityHtml = qualityResults ? `
+                    <div class="subsection-title">Résultats du contrôle qualité</div>
+                    <div class="quality-grid">
+                        <div class="quality-pill"><span>Température</span><span>${qualityResults.temperature} °C</span></div>
+                        <div class="quality-pill"><span>Point de congélation</span><span>${qualityResults.cryo} °C</span></div>
+                        <div class="quality-pill"><span>pH</span><span>${qualityResults.ph}</span></div>
+                        <div class="quality-pill"><span>Antibiotiques</span><span>${qualityResults.antibiotics}</span></div>
+                    </div>
+                    <div class="quality-decision ${qualityResults.decision === 'Conforme' ? 'ok' : 'ko'}">
+                        <i class="fas ${qualityResults.decision === 'Conforme' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+                        ${qualityResults.decision} · ${qualityResults.comment}
+                    </div>
+                ` : `<div class="subsection-title">Contrôle qualité à réaliser</div><p style="font-size:14px;">Avant pompage, effectuez le test qualité.</p>`;
+                const nonConformeMessage = (qualityResults && qualityResults.decision === 'Non conforme') ? 
+                    '<div class="non-conforme-message"><i class="fas fa-times-circle"></i> Lait non conforme, collecte impossible</div>' : '';
+                contentDiv.innerHTML = `
+                    <div class="detail-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                            <h3 style="font-size: 30px; font-weight: 800;">${producer.name}</h3>
+                            <span class="producer-time">${producer.time}</span>
+                        </div>
+                        <table class="detail-table">
+                            <tr><th><i class="fas fa-map-marker-alt"></i> Adresse</th><td>${producer.address}</td></tr>
+                            <tr><th><i class="fas fa-phone-alt"></i> Téléphone</th><td>${producer.phone}</td></tr>
+                            <tr><th><i class="fas fa-tint"></i> Type de lait</th><td>${producer.milkType}</td></tr>
+                            <tr><th><i class="fas fa-chart-line"></i> Volume prévisionnel</th><td><span class="volume-preview">${producer.expectedVolume} L</span></td></tr>
+                        </table>
+                        <div class="detail-field">
+                            <div class="detail-label"><i class="fas fa-flask"></i> Contrôle qualité</div>
+                            <div class="detail-value" style="flex-direction: column; align-items: flex-start;">
+                                ${qualityHtml}
+                                ${nonConformeMessage}
+                                <button class="action-compact-btn" id="testQualityBtn" ${testPassed ? 'disabled' : ''}><i class="fas fa-flask"></i> ${testPassed ? 'Test qualité OK' : 'Effectuer test qualité'}</button>
+                            </div>
+                        </div>
+                        <div class="detail-field">
+                            <div class="detail-label"><i class="fas fa-tint"></i> Pompage</div>
+                            <div class="detail-value" style="flex-direction: column; align-items: stretch;">
+                                <div style="display:flex; justify-content:space-between; align-items:center;">
+                                    <span>${pumpingDone ? 'Pompage terminé' : 'En attente'}</span>
+                                    <button class="action-compact-btn" id="startPumpBtn" ${testPassed && !pumpingDone ? '' : 'disabled'}><i class="fas fa-tint"></i> Démarrer</button>
+                                </div>
+                                <div id="pumpAnimation" style="display: none;" class="pump-animation">
+                                    <i class="fas fa-tint pump-icon"></i>
+                                    <div style="flex:1;">
+                                        <span style="font-weight:600;">Pompage en cours...</span>
+                                        <div class="progress-bar"><div class="progress-bar-fill" id="pumpProgressFill"></div></div>
+                                    </div>
+                                </div>
+                                ${qualityResults && qualityResults.decision === 'Non conforme' ? '<p style="color:#B3261E; margin-top:8px;"><i class="fas fa-info-circle"></i> Impossible de pomper un lait non conforme.</p>' : ''}
+                            </div>
+                        </div>
+                        <div id="collectionForm" style="display: ${testPassed && pumpingDone ? 'block' : 'none'};">
+                            <div class="detail-field">
+                                <label class="detail-label"><i class="fas fa-weight"></i> Volume réel</label>
+                                <input type="number" id="actualVolume" class="input-field" value="${volume}" min="0" step="1">
+                            </div>
+                            <div class="detail-field">
+                                <label class="detail-label"><i class="fas fa-comment"></i> Commentaire</label>
+                                <textarea id="comment" class="comment-area" rows="2" placeholder="Ajouter un commentaire...">${comment}</textarea>
+                            </div>
+                            <div class="code-container">
+                                <div style="font-weight:600;">Code producteur</div>
+                                <div class="code-digits">7 · 8 · 2 · 6</div>
+                                <input type="text" id="codeInput" class="code-input" placeholder="____" maxlength="4" autocomplete="off">
+                            </div>
+                            <p id="collectionError" class="error-msg" style="display:none;"></p>
+                            <button class="btn-primary" id="validateCollectionBtn" style="width:100%;"><i class="fas fa-check-circle"></i> Valider la collecte</button>
+                        </div>
+                        ${qualityResults && qualityResults.decision === 'Non conforme' && !producer.collected ? `
+                            <div style="margin-top:20px;">
+                                <div class="code-container">
+                                    <div style="font-weight:600;">Code producteur</div>
+                                    <div class="code-digits">7 · 8 · 2 · 6</div>
+                                    <input type="text" id="rejectCodeInput" class="code-input" placeholder="____" maxlength="4" autocomplete="off">
+                                </div>
+                                <p id="rejectError" class="error-msg" style="display:none;"></p>
+                                <button class="btn-reject" id="rejectCollectionBtn"><i class="fas fa-times-circle"></i> Refuser la collecte</button>
+                            </div>
+                        ` : ''}
+                        <button class="back-button-bottom" id="backToPlanning"><i class="fas fa-arrow-left"></i> Retour au planning</button>
+                    </div>
+                `;
+                const testBtn = document.getElementById('testQualityBtn');
+                if (testBtn) {
+                    testBtn.addEventListener('click', () => {
+                        testBtn.innerHTML = `<span class="spinner"></span> Analyse…`;
+                        testBtn.disabled = true;
+                        setTimeout(() => {
+                            let antibioticsOk;
+                            if (producer.id === 3) {
+                                antibioticsOk = false;
+                            } else {
+                                antibioticsOk = Math.random() > 0.02;
+                            }
+                            producer.qualityResults = {
+                                temperature: (3.8 + (Math.random()*0.8-0.4)).toFixed(1),
+                                cryo: (-0.520 + (Math.random()*0.008-0.004)).toFixed(3),
+                                ph: (6.7 + (Math.random()*0.1-0.05)).toFixed(2),
+                                antibiotics: antibioticsOk ? 'Négatif' : 'Trace suspecte',
+                                decision: antibioticsOk ? 'Conforme' : 'Non conforme',
+                                comment: antibioticsOk ? 'Lait conforme' : 'Contre-analyse requise'
+                            };
+                            producer.testPassed = antibioticsOk;
+                            renderCollection();
+                        }, 1800);
+                    });
+                }
+                const pumpBtn = document.getElementById('startPumpBtn');
+                if (pumpBtn) {
+                    pumpBtn.addEventListener('click', () => {
+                        if (!producer.testPassed) return;
+                        pumpBtn.disabled = true;
+                        const pumpAnimation = document.getElementById('pumpAnimation');
+                        const pumpProgressFill = document.getElementById('pumpProgressFill');
+                        pumpAnimation.style.display = 'flex';
+                        let progress = 0;
+                        const targetVolume = producer.expectedVolume;
+                        const interval = setInterval(() => {
+                            progress += 8 + Math.random()*7;
+                            if (progress > 100) progress = 100;
+                            pumpProgressFill.style.width = progress + '%';
+                            if (progress >= 100) {
+                                clearInterval(interval);
+                                producer.pumpingDone = true;
+                                const variation = targetVolume * (Math.random()*0.08 - 0.04);
+                                producer.actualVolume = Math.max(0, Math.round(targetVolume + variation));
+                                renderCollection();
+                            }
+                        }, 220);
+                    });
+                }
+                const validateBtn = document.getElementById('validateCollectionBtn');
+                if (validateBtn) {
+                    validateBtn.addEventListener('click', () => {
+                        const volumeInput = document.getElementById('actualVolume');
+                        const commentInput = document.getElementById('comment');
+                        const codeInput = document.getElementById('codeInput');
+                        const volumeVal = parseInt(volumeInput.value, 10);
+                        const codeVal = codeInput.value.trim();
+                        if (!producer.testPassed) { showError('Réalisez le test qualité.'); return; }
+                        if (!producer.pumpingDone) { showError('Terminez le pompage.'); return; }
+                        if (!volumeVal || volumeVal <= 0) { showError('Volume invalide.'); return; }
+                        if (codeVal !== VALIDATION_CODE) { showError('Code producteur incorrect (7826).'); return; }
+                        producer.actualVolume = volumeVal;
+                        producer.comment = commentInput.value;
+                        producer.collected = true;
+                        currentScreen = 'planning';
+                        render();
+                        function showError(msg) {
+                            const err = document.getElementById('collectionError');
+                            if (err) { err.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg; err.style.display = 'flex'; }
+                        }
+                    });
+                }
+                const rejectBtn = document.getElementById('rejectCollectionBtn');
+                if (rejectBtn) {
+                    rejectBtn.addEventListener('click', () => {
+                        const codeInput = document.getElementById('rejectCodeInput');
+                        const codeVal = codeInput.value.trim();
+                        if (codeVal !== VALIDATION_CODE) {
+                            const err = document.getElementById('rejectError');
+                            if (err) { err.innerHTML = '<i class="fas fa-exclamation-circle"></i> Code producteur incorrect (7826).'; err.style.display = 'flex'; }
+                            return;
+                        }
+                        producer.collected = false;
+                        producer.actualVolume = null;
+                        producer.comment = "Refusé (non conforme)";
+                        currentScreen = 'planning';
+                        render();
+                    });
+                }
+                document.getElementById('backToPlanning')?.addEventListener('click', () => {
+                    currentScreen = 'planning';
+                    render();
+                });
+                document.querySelectorAll('.nav-item').forEach((item, i) => {
+                    item.addEventListener('click', () => {
+                        if (i === 0) { currentScreen = 'calendar'; setActiveNav(1); render(); }
+                        else if (i === 1) { currentScreen = 'calendar'; setActiveNav(1); render(); }
+                        else if (i === 2) {
+                            if (selectedCalendarDate) { currentScreen = 'planning'; setActiveNav(2); render(); }
+                            else { alert("Veuillez d'abord sélectionner un jour dans le planning."); }
+                        }
+                    });
+                });
+            }
+
+            function renderStockage() {
+                if (!authenticated) { currentScreen = 'login'; render(); return; }
+                if (!tourFinished) { currentScreen = 'planning'; render(); return; }
+                setActiveNav(4);
+                const totalVolume = producers.reduce((acc, p) => acc + (p.actualVolume || 0), 0);
+                const tanks = ['A-2-47-G', 'A-2-48-D', 'C-8-06-G'];
+                const truckCompartments = [
+                    { name: 'Cuve 1', volume: Math.round(totalVolume * 0.4) },
+                    { name: 'Cuve 2', volume: Math.round(totalVolume * 0.35) },
+                    { name: 'Cuve 3', volume: totalVolume - Math.round(totalVolume * 0.4) - Math.round(totalVolume * 0.35) }
+                ];
+                contentDiv.innerHTML = `
+                    <button class="back-button" id="backToStockage"><i class="fas fa-arrow-left"></i> Accueil</button>
+                    <div class="section-title"><i class="fas fa-warehouse"></i> Bon de stockage</div>
+                    <div class="card">
+                        <table class="detail-table">
+                            <tr><th>Date</th><td>${selectedCalendarDate || '04/03/2026'}</td></tr>
+                            <tr><th>N° bon</th><td>47567A</td></tr>
+                            <tr><th><i class="fas fa-truck"></i> Véhicule</th><td>${driver.vehicle} · Arrivée ${driver.endKm} km</td></tr>
+                            <tr><th><i class="fas fa-weight"></i> Volume total</th><td><strong>${totalVolume} L</strong></td></tr>
+                        </table>
+                        <div style="margin: 24px 0;">
+                            <div class="subsection-title">Répartition camion</div>
+                            <div class="tanks-grid">${truckCompartments.map(c => `<span class="tank"><i class="fas fa-oil-can"></i> ${c.name} · ${c.volume} L</span>`).join('')}</div>
+                        </div>
+                        <hr style="border: 1px solid rgba(255,255,255,0.6); margin: 24px 0;">
+                        <p><strong>Citernes de stockage</strong></p>
+                        <div class="tanks-grid">${tanks.map(t => `<span class="tank"><i class="fas fa-flask"></i> ${t}</span>`).join('')}</div>
+                        <div style="margin: 30px 0;"><button class="btn-primary" id="startUnloadBtn" style="width:100%;"><i class="fas fa-download"></i> Commencer le déchargement</button></div>
+                        <div id="unloadSection" style="display: none;">
+                            <div class="pump-animation" style="flex-direction: column;">
+                                <div style="display:flex; align-items:center; gap:16px; width:100%;">
+                                    <i class="fas fa-tint pump-icon"></i>
+                                    <div style="flex:1;">
+                                        <span style="font-weight:600;" id="unloadStatusText">Déchargement en cours…</span>
+                                        <div style="font-size:12px;">Progression : <span id="unloadProgressText">0%</span></div>
+                                    </div>
+                                </div>
+                                <div style="width:100%; margin-top:8px;"><div class="progress-bar"><div class="progress-bar-fill" id="unloadProgressFill"></div></div></div>
+                            </div>
+                            <div style="margin: 20px 0;">
+                                <label class="detail-label">Signature magasinier</label>
+                                <div class="signature-area" id="signatureArea"><canvas id="signatureCanvas" width="300" height="120"></canvas><p><i class="fas fa-pen"></i> Cliquez pour signer</p></div>
+                            </div>
+                            <button class="btn-primary" id="finishStockBtn" style="width:100%;" disabled><i class="fas fa-check"></i> Finaliser le stockage</button>
+                        </div>
+                    </div>
+                `;
+                let unloadProgress = 0, hasSigned = false;
+                function checkCanFinish() {
+                    const finishBtn = document.getElementById('finishStockBtn');
+                    if (finishBtn) finishBtn.disabled = !(unloadProgress >= 100 && hasSigned);
+                }
+                document.getElementById('startUnloadBtn')?.addEventListener('click', () => {
+                    const btn = document.getElementById('startUnloadBtn');
+                    const unloadSection = document.getElementById('unloadSection');
+                    const progressFill = document.getElementById('unloadProgressFill');
+                    const progressText = document.getElementById('unloadProgressText');
+                    const statusText = document.getElementById('unloadStatusText');
+                    btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Préparation…';
+                    setTimeout(() => {
+                        btn.style.display = 'none';
+                        unloadSection.style.display = 'block';
+                        const interval = setInterval(() => {
+                            unloadProgress += 7 + Math.random()*8;
+                            if (unloadProgress > 100) unloadProgress = 100;
+                            progressFill.style.width = unloadProgress + '%';
+                            progressText.textContent = Math.round(unloadProgress) + '%';
+                            if (unloadProgress >= 100) {
+                                clearInterval(interval);
+                                statusText.textContent = 'Déchargement terminé ✓';
+                                initSignature();
+                                checkCanFinish();
+                            }
+                        }, 260);
+                    }, 1400);
+                });
+                function initSignature() {
+                    const canvas = document.getElementById('signatureCanvas');
+                    if (!canvas) return;
+                    const ctx = canvas.getContext('2d');
+                    let drawing = false;
+                    function resizeCanvas() {
+                        const rect = canvas.getBoundingClientRect();
+                        const dpr = window.devicePixelRatio || 1;
+                        canvas.width = Math.floor(rect.width * dpr);
+                        canvas.height = Math.floor(rect.height * dpr);
+                        ctx.scale(dpr, dpr);
+                        canvas.style.width = rect.width + 'px';
+                        canvas.style.height = rect.height + 'px';
+                    }
+                    resizeCanvas();
+                    function getPos(e) {
+                        const rect = canvas.getBoundingClientRect();
+                        const clientX = e.clientX ?? (e.touches?.[0]?.clientX || 0);
+                        const clientY = e.clientY ?? (e.touches?.[0]?.clientY || 0);
+                        return { x: clientX - rect.left, y: clientY - rect.top };
+                    }
+                    function startDraw(e) { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }
+                    function moveDraw(e) { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasSigned = true; checkCanFinish(); }
+                    function endDraw() { drawing = false; }
+                    ctx.lineWidth = 2; ctx.strokeStyle = '#0B3B4B'; ctx.lineCap = 'round';
+                    canvas.addEventListener('mousedown', startDraw);
+                    canvas.addEventListener('mousemove', moveDraw);
+                    canvas.addEventListener('mouseup', endDraw);
+                    canvas.addEventListener('mouseleave', endDraw);
+                    canvas.addEventListener('touchstart', startDraw, { passive: false });
+                    canvas.addEventListener('touchmove', moveDraw, { passive: false });
+                    canvas.addEventListener('touchend', endDraw);
+                }
+                document.getElementById('finishStockBtn')?.addEventListener('click', () => {
+                    const unloadSection = document.getElementById('unloadSection');
+                    unloadSection.innerHTML = `
+                        <div class="sync-overlay">
+                            <div class="sync-content">
+                                <span class="spinner" style="margin-bottom:16px;"></span>
+                                <p style="font-weight:600;">Synchronisation des données</p>
+                                <div class="progress-bar" style="margin-top:16px;"><div class="progress-bar-fill" id="syncProgressFill"></div></div>
+                            </div>
+                        </div>
+                    `;
+                    let syncProgress = 0;
+                    const fill = document.getElementById('syncProgressFill');
+                    const iv = setInterval(() => {
+                        syncProgress += 12;
+                        if (syncProgress > 100) syncProgress = 100;
+                        if (fill) fill.style.width = syncProgress + '%';
+                        if (syncProgress >= 100) {
+                            clearInterval(iv);
+                            unloadSection.innerHTML = `
+                                <div class="success-card">
+                                    <div class="success-emoji">🎉</div>
+                                    <div class="success-title">Félicitations !</div>
+                                    <div class="success-sub">Tournée terminée.</div>
+                                    <button class="btn-primary" id="backToLoginBtn" style="margin-top:24px;"><i class="fas fa-home"></i> Retour accueil</button>
+                                </div>
+                            `;
+                            document.getElementById('backToLoginBtn')?.addEventListener('click', resetDemo);
+                        }
+                    }, 120);
+                });
+                document.getElementById('backToStockage')?.addEventListener('click', () => {
+                    currentScreen = 'calendar';
+                    setActiveNav(1);
+                    render();
+                });
+                document.querySelectorAll('.nav-item').forEach((item, i) => {
+                    item.addEventListener('click', () => {
+                        if (i === 0) { currentScreen = 'calendar'; setActiveNav(1); render(); }
+                        else if (i === 1) { currentScreen = 'calendar'; setActiveNav(1); render(); }
+                        else if (i === 2) {
+                            if (selectedCalendarDate) { currentScreen = 'planning'; setActiveNav(2); render(); }
+                            else { alert("Veuillez d'abord sélectionner un jour dans le planning."); }
+                        }
+                    });
+                });
+            }
+
+            function resetDemo() {
+                producers.forEach(p => { p.collected = false; p.actualVolume = null; p.comment = ''; p.testPassed = false; p.pumpingDone = false; p.qualityResults = null; });
+                driver.endKm = null; tourFinished = false; arrivalKmInput = ''; selectedCalendarDate = null; authenticated = false;
+                updateDriverBadge(); currentScreen = 'login'; render();
+            }
+
+            updateDriverBadge();
+            render();
+        })();
+    </script>
 </body>
 </html>
