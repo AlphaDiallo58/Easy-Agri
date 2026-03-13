@@ -6,6 +6,9 @@
     <title>EasyAgri · Chauffeur</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Ajout Leaflet pour la carte -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -462,6 +465,7 @@
                 endKm: null
             };
 
+            // Ajout des coordonnées GPS pour chaque producteur (approximatives)
             const producers = [
                 {
                     id: 1,
@@ -478,7 +482,9 @@
                     testPassed: false,
                     codeValid: false,
                     pumpingDone: false,
-                    qualityResults: null
+                    qualityResults: null,
+                    lat: 45.945,
+                    lon: 6.035
                 },
                 {
                     id: 2,
@@ -495,7 +501,9 @@
                     testPassed: false,
                     codeValid: false,
                     pumpingDone: false,
-                    qualityResults: null
+                    qualityResults: null,
+                    lat: 45.922,
+                    lon: 6.065
                 },
                 {
                     id: 3,
@@ -503,7 +511,7 @@
                     address: "137 rue la Bergerie, 74150 Rumilly",
                     phone: "07 35 52 21 86",
                     time: "10h00",
-                    milkType: "Chèvre",
+                    milkType: "Vache",
                     expectedVolume: 510,
                     quality: "Excellent",
                     collected: false,
@@ -512,7 +520,9 @@
                     testPassed: false,
                     codeValid: false,
                     pumpingDone: false,
-                    qualityResults: null
+                    qualityResults: null,
+                    lat: 45.866,
+                    lon: 5.944
                 }
             ];
 
@@ -527,6 +537,7 @@
             let arrivalKmInput = '';
             let errorMessage = '';
             let authenticated = false;
+            let currentMap = null; // Pour stocker la carte Leaflet
 
             const contentDiv = document.getElementById('content');
 
@@ -606,6 +617,77 @@
                 }
             }
 
+            // Nouvelle fonction pour initialiser la carte avec numéros d'ordre et Waze
+            function initializeMap() {
+                if (typeof L === 'undefined') return; // Leaflet pas encore chargé
+
+                // Si une carte existe déjà, la détruire
+                if (currentMap) {
+                    currentMap.remove();
+                    currentMap = null;
+                }
+
+                // Récupérer les producteurs avec coordonnées et triés par heure
+                const producersWithCoords = producers.filter(p => p.lat && p.lon);
+                if (producersWithCoords.length === 0) return;
+
+                // Trier par heure
+                const sorted = [...producersWithCoords].sort((a, b) => a.time.localeCompare(b.time));
+
+                // Créer la carte centrée sur le premier point
+                const map = L.map('map').setView([sorted[0].lat, sorted[0].lon], 11);
+                currentMap = map;
+
+                // Fond de carte OpenStreetMap
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+
+                // Tableau de couleurs pour les numéros
+                const colors = ['#2C7A9E', '#F97316', '#E63946', '#8B5CF6', '#10B981'];
+
+                // Ajouter les marqueurs avec popup (nom, heure, et lien Waze)
+                const latlngs = [];
+                sorted.forEach((p, index) => {
+                    const num = index + 1;
+                    const color = colors[index % colors.length];
+
+                    // Créer une icône personnalisée avec un cercle coloré et le numéro
+                    const icon = L.divIcon({
+                        className: 'custom-marker',
+                        html: `<div style="background-color: ${color}; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">${num}</div>`,
+                        iconSize: [32, 32],
+                        iconAnchor: [16, 16],
+                        popupAnchor: [0, -16]
+                    });
+
+                    const marker = L.marker([p.lat, p.lon], { icon }).addTo(map);
+
+                    // Construire le contenu du popup avec le lien Waze
+                    const wazeUrl = `https://waze.com/ul?ll=${p.lat},${p.lon}&navigate=yes`;
+                    const popupContent = `
+                        <b>${p.name}</b><br>
+                        ${p.time}<br>
+                        ${p.address}<br>
+                        <a href="${wazeUrl}" target="_blank" style="display: inline-block; margin-top: 8px; background: #33CCFF; color: white; padding: 6px 12px; border-radius: 20px; text-decoration: none; font-weight: 600;"><i class="fab fa-waze"></i> Ouvrir dans Waze</a>
+                    `;
+                    marker.bindPopup(popupContent);
+
+                    latlngs.push([p.lat, p.lon]);
+                });
+
+                // Tracer la polyligne (itinéraire)
+                if (latlngs.length > 1) {
+                    L.polyline(latlngs, { color: '#0B3B4B', weight: 4, opacity: 0.7 }).addTo(map);
+                }
+
+                // Ajuster le zoom pour voir tous les points
+                if (latlngs.length > 0) {
+                    const bounds = L.latLngBounds(latlngs);
+                    map.fitBounds(bounds, { padding: [30, 30] });
+                }
+            }
+
             function renderHome() {
                 contentDiv.innerHTML = `
                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 600px; text-align: center; padding: 40px;">
@@ -613,8 +695,8 @@
                             <i class="fas fa-tractor"></i>
                         </div>
                         <h1 style="font-size: 52px; font-weight: 800; color: var(--text-dark); margin-bottom: 16px; letter-spacing: -0.02em;">EasyAgri</h1>
-                        <p style="font-size: 22px; color: var(--text-medium); margin-bottom: 8px;">Coopérative agricole</p>
-                        <p style="font-size: 18px; color: var(--text-light); margin-bottom: 60px; max-width: 500px;">Réaliser vos tournées de collecte en toute simplicité.</p>
+                        <p style="font-size: 22px; color: var(--text-medium); margin-bottom: 8px;">Coopérative agricole de référence</p>
+                        <p style="font-size: 18px; color: var(--text-light); margin-bottom: 60px; max-width: 500px;">Optimisez vos collectes avec EasyAgri.</p>
                         
                         <div style="display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 340px;">
                             <button class="btn-primary" style="padding: 22px; font-size: 20px;">
@@ -821,6 +903,14 @@
                         <thead><tr><th>Producteur</th><th style="text-align:center;">Horaire</th><th style="text-align:right;">Statut</th></tr></thead>
                         <tbody>${rows}</tbody>
                     </table>
+                    <!-- Nouvelle carte d'itinéraire avec numéros d'ordre et Waze -->
+                    <div class="card" style="margin-top:20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                            <span class="section-title" style="font-size:20px;"><i class="fas fa-map-marked-alt"></i> Itinéraire</span>
+                            <span class="section-date">Ordre de passage</span>
+                        </div>
+                        <div id="map" style="height:250px; width:100%; border-radius:24px; overflow:hidden; border:1px solid rgba(255,255,255,0.7);"></div>
+                    </div>
                     <div class="km-section">
                         <div class="km-box"><div class="km-label">KM départ</div><div class="km-value">${departKm}</div></div>
                         <div class="km-box">
@@ -903,6 +993,9 @@
                         }
                     });
                 });
+
+                // Initialiser la carte après l'insertion du HTML
+                initializeMap();
             }
 
             function renderCollection() {
